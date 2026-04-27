@@ -1,0 +1,47 @@
+type Timestamp = int;
+type SubmitLeadResult = 
+ variant {
+   err: text;
+   ok: LeadId;
+ };
+type LeadInput = 
+ record {
+   company: text;
+   email: text;
+   fullName: text;
+   message: text;
+   phone: text;
+ };
+type LeadId = nat;
+type Lead = 
+ record {
+   company: text;
+   email: text;
+   fullName: text;
+   id: LeadId;
+   message: text;
+   phone: text;
+   submittedAt: Timestamp;
+ };
+type AuditResult = 
+ variant {
+   err: text;
+   ok: AuditReport;
+ };
+type AuditReport = 
+ record {
+   backlinkScore: nat;
+   metaTagsScore: nat;
+   mobileFriendlinessScore: nat;
+   onPageScore: nat;
+   overallScore: nat;
+   pageSpeedScore: nat;
+   recommendations: vec text;
+   technicalScore: nat;
+   url: text;
+ };
+service : {
+  getLeads: () -> (vec Lead);
+  runSeoAudit: (url: text) -> (AuditResult);
+  submitLead: (input: LeadInput) -> (SubmitLeadResult);
+}

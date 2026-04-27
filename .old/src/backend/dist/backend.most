@@ -1,0 +1,24 @@
+// Version: 1.0.0
+type LeadId__1073473045 = Nat;
+type Lead__531162083 =
+  {
+    company : Text;
+    email : Text;
+    fullName : Text;
+    id : LeadId__1073473045;
+    message : Text;
+    phone : Text;
+    submittedAt : Timestamp__301639476
+  };
+type Nat__490723111 = Nat__920180692;
+type Nat__920180692 = Nat;
+type Timestamp__301639476 = Int;
+actor {
+  stable leads :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Lead__531162083]];
+      var elementIndex : Nat__490723111
+    };
+  stable var nextLeadId : Nat
+};
