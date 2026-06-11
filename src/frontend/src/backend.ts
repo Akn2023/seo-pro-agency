@@ -89,15 +89,6 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface Lead {
-    id: LeadId;
-    fullName: string;
-    submittedAt: Timestamp;
-    email: string;
-    company: string;
-    message: string;
-    phone: string;
-}
 export interface AuditReport {
     url: string;
     overallScore: bigint;
@@ -111,12 +102,73 @@ export interface AuditReport {
 }
 export type Timestamp = bigint;
 export type LeadId = bigint;
+export interface SubscriptionView {
+    status: SubscriptionStatus;
+    nextBillingDate: Timestamp;
+    trialEndDate: Timestamp;
+    isInstantPayment: boolean;
+    createdAt: Timestamp;
+    discountedAmountCents: bigint;
+    amountCents: bigint;
+    stripeSessionId?: string;
+    trialStartDate: Timestamp;
+    planName: string;
+    planType: PlanType;
+}
+export interface CheckoutRequest {
+    isInstantPayment: boolean;
+    plan: PlanType;
+}
 export interface LeadInput {
     fullName: string;
     email: string;
     company: string;
     message: string;
     phone: string;
+}
+export type CheckoutSessionResult = {
+    __kind__: "ok";
+    ok: CheckoutSessionData;
+} | {
+    __kind__: "err";
+    err: string;
+};
+export interface Lead {
+    id: LeadId;
+    fullName: string;
+    submittedAt: Timestamp;
+    email: string;
+    company: string;
+    message: string;
+    phone: string;
+}
+export type GetSubscriptionResult = {
+    __kind__: "ok";
+    ok: SubscriptionView;
+} | {
+    __kind__: "notFound";
+    notFound: null;
+};
+export interface TransactionView {
+    status: TransactionStatus;
+    paymentMethod: PaymentMethod;
+    amountCents: bigint;
+    orderId: string;
+    timestamp: Timestamp;
+    stripeSessionId?: string;
+    planName: string;
+    planType: PlanType;
+}
+export interface CheckoutSessionData {
+    isSubscription: boolean;
+    isInstantPayment: boolean;
+    trialDays: bigint;
+    discountedAmountCents: bigint;
+    amountCents: bigint;
+    orderId: string;
+    sessionId: string;
+    planName: string;
+    planType: PlanType;
 }
 export type AuditResult = {
     __kind__: "ok";
@@ -132,14 +184,96 @@ export type SubmitLeadResult = {
     __kind__: "err";
     err: string;
 };
+export enum PaymentMethod {
+    stripe = "stripe"
+}
+export enum PlanType {
+    webDesign = "webDesign",
+    enterprise = "enterprise",
+    starter = "starter",
+    professional = "professional"
+}
+export enum SubscriptionStatus {
+    trial = "trial",
+    active = "active",
+    cancelled = "cancelled",
+    pastDue = "pastDue"
+}
+export enum TransactionStatus {
+    pending = "pending",
+    success = "success",
+    failed = "failed"
+}
 export interface backendInterface {
+    cancelSubscription(): Promise<boolean>;
+    confirmPayment(stripeSessionId: string): Promise<boolean>;
+    createCheckoutSession(req: CheckoutRequest): Promise<CheckoutSessionResult>;
+    getAllTransactions(): Promise<Array<TransactionView>>;
     getLeads(): Promise<Array<Lead>>;
+    getMyTransactions(): Promise<Array<TransactionView>>;
+    getSubscription(): Promise<GetSubscriptionResult>;
     runSeoAudit(url: string): Promise<AuditResult>;
     submitLead(input: LeadInput): Promise<SubmitLeadResult>;
 }
-import type { AuditReport as _AuditReport, AuditResult as _AuditResult, LeadId as _LeadId, SubmitLeadResult as _SubmitLeadResult } from "./declarations/backend.did.d.ts";
+import type { AuditReport as _AuditReport, AuditResult as _AuditResult, CheckoutRequest as _CheckoutRequest, CheckoutSessionData as _CheckoutSessionData, CheckoutSessionResult as _CheckoutSessionResult, GetSubscriptionResult as _GetSubscriptionResult, LeadId as _LeadId, PaymentMethod as _PaymentMethod, PlanType as _PlanType, SubmitLeadResult as _SubmitLeadResult, SubscriptionStatus as _SubscriptionStatus, SubscriptionView as _SubscriptionView, Timestamp as _Timestamp, TransactionStatus as _TransactionStatus, TransactionView as _TransactionView } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async cancelSubscription(): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.cancelSubscription();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.cancelSubscription();
+            return result;
+        }
+    }
+    async confirmPayment(arg0: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.confirmPayment(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.confirmPayment(arg0);
+            return result;
+        }
+    }
+    async createCheckoutSession(arg0: CheckoutRequest): Promise<CheckoutSessionResult> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createCheckoutSession(to_candid_CheckoutRequest_n1(this._uploadFile, this._downloadFile, arg0));
+                return from_candid_CheckoutSessionResult_n5(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createCheckoutSession(to_candid_CheckoutRequest_n1(this._uploadFile, this._downloadFile, arg0));
+            return from_candid_CheckoutSessionResult_n5(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getAllTransactions(): Promise<Array<TransactionView>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllTransactions();
+                return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllTransactions();
+            return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getLeads(): Promise<Array<Lead>> {
         if (this.processError) {
             try {
@@ -154,42 +288,257 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getMyTransactions(): Promise<Array<TransactionView>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getMyTransactions();
+                return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getMyTransactions();
+            return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getSubscription(): Promise<GetSubscriptionResult> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getSubscription();
+                return from_candid_GetSubscriptionResult_n19(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getSubscription();
+            return from_candid_GetSubscriptionResult_n19(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async runSeoAudit(arg0: string): Promise<AuditResult> {
         if (this.processError) {
             try {
                 const result = await this.actor.runSeoAudit(arg0);
-                return from_candid_AuditResult_n1(this._uploadFile, this._downloadFile, result);
+                return from_candid_AuditResult_n25(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.runSeoAudit(arg0);
-            return from_candid_AuditResult_n1(this._uploadFile, this._downloadFile, result);
+            return from_candid_AuditResult_n25(this._uploadFile, this._downloadFile, result);
         }
     }
     async submitLead(arg0: LeadInput): Promise<SubmitLeadResult> {
         if (this.processError) {
             try {
                 const result = await this.actor.submitLead(arg0);
-                return from_candid_SubmitLeadResult_n3(this._uploadFile, this._downloadFile, result);
+                return from_candid_SubmitLeadResult_n27(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.submitLead(arg0);
-            return from_candid_SubmitLeadResult_n3(this._uploadFile, this._downloadFile, result);
+            return from_candid_SubmitLeadResult_n27(this._uploadFile, this._downloadFile, result);
         }
     }
 }
-function from_candid_AuditResult_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _AuditResult): AuditResult {
-    return from_candid_variant_n2(_uploadFile, _downloadFile, value);
+function from_candid_AuditResult_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _AuditResult): AuditResult {
+    return from_candid_variant_n26(_uploadFile, _downloadFile, value);
 }
-function from_candid_SubmitLeadResult_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _SubmitLeadResult): SubmitLeadResult {
-    return from_candid_variant_n4(_uploadFile, _downloadFile, value);
+function from_candid_CheckoutSessionData_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _CheckoutSessionData): CheckoutSessionData {
+    return from_candid_record_n8(_uploadFile, _downloadFile, value);
 }
-function from_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_CheckoutSessionResult_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _CheckoutSessionResult): CheckoutSessionResult {
+    return from_candid_variant_n6(_uploadFile, _downloadFile, value);
+}
+function from_candid_GetSubscriptionResult_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _GetSubscriptionResult): GetSubscriptionResult {
+    return from_candid_variant_n20(_uploadFile, _downloadFile, value);
+}
+function from_candid_PaymentMethod_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _PaymentMethod): PaymentMethod {
+    return from_candid_variant_n17(_uploadFile, _downloadFile, value);
+}
+function from_candid_PlanType_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _PlanType): PlanType {
+    return from_candid_variant_n10(_uploadFile, _downloadFile, value);
+}
+function from_candid_SubmitLeadResult_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _SubmitLeadResult): SubmitLeadResult {
+    return from_candid_variant_n28(_uploadFile, _downloadFile, value);
+}
+function from_candid_SubscriptionStatus_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _SubscriptionStatus): SubscriptionStatus {
+    return from_candid_variant_n24(_uploadFile, _downloadFile, value);
+}
+function from_candid_SubscriptionView_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _SubscriptionView): SubscriptionView {
+    return from_candid_record_n22(_uploadFile, _downloadFile, value);
+}
+function from_candid_TransactionStatus_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _TransactionStatus): TransactionStatus {
+    return from_candid_variant_n15(_uploadFile, _downloadFile, value);
+}
+function from_candid_TransactionView_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _TransactionView): TransactionView {
+    return from_candid_record_n13(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [string]): string | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_record_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    status: _TransactionStatus;
+    paymentMethod: _PaymentMethod;
+    amountCents: bigint;
+    orderId: string;
+    timestamp: _Timestamp;
+    stripeSessionId: [] | [string];
+    planName: string;
+    planType: _PlanType;
+}): {
+    status: TransactionStatus;
+    paymentMethod: PaymentMethod;
+    amountCents: bigint;
+    orderId: string;
+    timestamp: Timestamp;
+    stripeSessionId?: string;
+    planName: string;
+    planType: PlanType;
+} {
+    return {
+        status: from_candid_TransactionStatus_n14(_uploadFile, _downloadFile, value.status),
+        paymentMethod: from_candid_PaymentMethod_n16(_uploadFile, _downloadFile, value.paymentMethod),
+        amountCents: value.amountCents,
+        orderId: value.orderId,
+        timestamp: value.timestamp,
+        stripeSessionId: record_opt_to_undefined(from_candid_opt_n18(_uploadFile, _downloadFile, value.stripeSessionId)),
+        planName: value.planName,
+        planType: from_candid_PlanType_n9(_uploadFile, _downloadFile, value.planType)
+    };
+}
+function from_candid_record_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    status: _SubscriptionStatus;
+    nextBillingDate: _Timestamp;
+    trialEndDate: _Timestamp;
+    isInstantPayment: boolean;
+    createdAt: _Timestamp;
+    discountedAmountCents: bigint;
+    amountCents: bigint;
+    stripeSessionId: [] | [string];
+    trialStartDate: _Timestamp;
+    planName: string;
+    planType: _PlanType;
+}): {
+    status: SubscriptionStatus;
+    nextBillingDate: Timestamp;
+    trialEndDate: Timestamp;
+    isInstantPayment: boolean;
+    createdAt: Timestamp;
+    discountedAmountCents: bigint;
+    amountCents: bigint;
+    stripeSessionId?: string;
+    trialStartDate: Timestamp;
+    planName: string;
+    planType: PlanType;
+} {
+    return {
+        status: from_candid_SubscriptionStatus_n23(_uploadFile, _downloadFile, value.status),
+        nextBillingDate: value.nextBillingDate,
+        trialEndDate: value.trialEndDate,
+        isInstantPayment: value.isInstantPayment,
+        createdAt: value.createdAt,
+        discountedAmountCents: value.discountedAmountCents,
+        amountCents: value.amountCents,
+        stripeSessionId: record_opt_to_undefined(from_candid_opt_n18(_uploadFile, _downloadFile, value.stripeSessionId)),
+        trialStartDate: value.trialStartDate,
+        planName: value.planName,
+        planType: from_candid_PlanType_n9(_uploadFile, _downloadFile, value.planType)
+    };
+}
+function from_candid_record_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    isSubscription: boolean;
+    isInstantPayment: boolean;
+    trialDays: bigint;
+    discountedAmountCents: bigint;
+    amountCents: bigint;
+    orderId: string;
+    sessionId: string;
+    planName: string;
+    planType: _PlanType;
+}): {
+    isSubscription: boolean;
+    isInstantPayment: boolean;
+    trialDays: bigint;
+    discountedAmountCents: bigint;
+    amountCents: bigint;
+    orderId: string;
+    sessionId: string;
+    planName: string;
+    planType: PlanType;
+} {
+    return {
+        isSubscription: value.isSubscription,
+        isInstantPayment: value.isInstantPayment,
+        trialDays: value.trialDays,
+        discountedAmountCents: value.discountedAmountCents,
+        amountCents: value.amountCents,
+        orderId: value.orderId,
+        sessionId: value.sessionId,
+        planName: value.planName,
+        planType: from_candid_PlanType_n9(_uploadFile, _downloadFile, value.planType)
+    };
+}
+function from_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    webDesign: null;
+} | {
+    enterprise: null;
+} | {
+    starter: null;
+} | {
+    professional: null;
+}): PlanType {
+    return "webDesign" in value ? PlanType.webDesign : "enterprise" in value ? PlanType.enterprise : "starter" in value ? PlanType.starter : "professional" in value ? PlanType.professional : value;
+}
+function from_candid_variant_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    pending: null;
+} | {
+    success: null;
+} | {
+    failed: null;
+}): TransactionStatus {
+    return "pending" in value ? TransactionStatus.pending : "success" in value ? TransactionStatus.success : "failed" in value ? TransactionStatus.failed : value;
+}
+function from_candid_variant_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    stripe: null;
+}): PaymentMethod {
+    return "stripe" in value ? PaymentMethod.stripe : value;
+}
+function from_candid_variant_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    ok: _SubscriptionView;
+} | {
+    notFound: null;
+}): {
+    __kind__: "ok";
+    ok: SubscriptionView;
+} | {
+    __kind__: "notFound";
+    notFound: null;
+} {
+    return "ok" in value ? {
+        __kind__: "ok",
+        ok: from_candid_SubscriptionView_n21(_uploadFile, _downloadFile, value.ok)
+    } : "notFound" in value ? {
+        __kind__: "notFound",
+        notFound: value.notFound
+    } : value;
+}
+function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    trial: null;
+} | {
+    active: null;
+} | {
+    cancelled: null;
+} | {
+    pastDue: null;
+}): SubscriptionStatus {
+    return "trial" in value ? SubscriptionStatus.trial : "active" in value ? SubscriptionStatus.active : "cancelled" in value ? SubscriptionStatus.cancelled : "pastDue" in value ? SubscriptionStatus.pastDue : value;
+}
+function from_candid_variant_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     ok: _AuditReport;
 } | {
     err: string;
@@ -208,7 +557,7 @@ function from_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uin
         err: value.err
     } : value;
 }
-function from_candid_variant_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_variant_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     ok: _LeadId;
 } | {
     err: string;
@@ -225,6 +574,65 @@ function from_candid_variant_n4(_uploadFile: (file: ExternalBlob) => Promise<Uin
     } : "err" in value ? {
         __kind__: "err",
         err: value.err
+    } : value;
+}
+function from_candid_variant_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    ok: _CheckoutSessionData;
+} | {
+    err: string;
+}): {
+    __kind__: "ok";
+    ok: CheckoutSessionData;
+} | {
+    __kind__: "err";
+    err: string;
+} {
+    return "ok" in value ? {
+        __kind__: "ok",
+        ok: from_candid_CheckoutSessionData_n7(_uploadFile, _downloadFile, value.ok)
+    } : "err" in value ? {
+        __kind__: "err",
+        err: value.err
+    } : value;
+}
+function from_candid_vec_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_TransactionView>): Array<TransactionView> {
+    return value.map((x)=>from_candid_TransactionView_n12(_uploadFile, _downloadFile, x));
+}
+function to_candid_CheckoutRequest_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: CheckoutRequest): _CheckoutRequest {
+    return to_candid_record_n2(_uploadFile, _downloadFile, value);
+}
+function to_candid_PlanType_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PlanType): _PlanType {
+    return to_candid_variant_n4(_uploadFile, _downloadFile, value);
+}
+function to_candid_record_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    isInstantPayment: boolean;
+    plan: PlanType;
+}): {
+    isInstantPayment: boolean;
+    plan: _PlanType;
+} {
+    return {
+        isInstantPayment: value.isInstantPayment,
+        plan: to_candid_PlanType_n3(_uploadFile, _downloadFile, value.plan)
+    };
+}
+function to_candid_variant_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PlanType): {
+    webDesign: null;
+} | {
+    enterprise: null;
+} | {
+    starter: null;
+} | {
+    professional: null;
+} {
+    return value == PlanType.webDesign ? {
+        webDesign: null
+    } : value == PlanType.enterprise ? {
+        enterprise: null
+    } : value == PlanType.starter ? {
+        starter: null
+    } : value == PlanType.professional ? {
+        professional: null
     } : value;
 }
 export interface CreateActorOptions {

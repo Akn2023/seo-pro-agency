@@ -378,7 +378,7 @@ export default function Services() {
                         Complete website delivered in 7–14 business days
                       </p>
                       <a
-                        href="/#contact"
+                        href="/checkout?plan=webdesign"
                         data-ocid="services.web_design.cta_button"
                       >
                         <Button

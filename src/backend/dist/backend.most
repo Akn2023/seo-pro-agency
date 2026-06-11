@@ -1,4 +1,8 @@
-// Version: 1.0.0
+// Version: 3.0.0
+type Data__791452850<K, V> =
+  {var count : Nat__490723111; kvs : [var ?(K, V)]};
+type Internal__8484328<K, V> =
+  {children : [var ?Node__46230540<K, V>]; data : Data__791452850<K, V>};
 type LeadId__1073473045 = Nat;
 type Lead__531162083 =
   {
@@ -10,15 +14,78 @@ type Lead__531162083 =
     phone : Text;
     submittedAt : Timestamp__301639476
   };
+type Leaf__809889148<K, V> = {data : Data__791452850<K, V>};
 type Nat__490723111 = Nat__920180692;
 type Nat__920180692 = Nat;
+type Node__46230540<K, V> =
+  {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
+type PaymentMethod__736241749 = {#stripe};
+type PlanType__813829990 = {#enterprise; #professional; #starter; #webDesign};
+type SubscriptionRecord__119727226 =
+  {
+    amountCents : Nat;
+    createdAt : Timestamp__301639476;
+    discountedAmountCents : Nat;
+    isInstantPayment : Bool;
+    nextBillingDate : Timestamp__301639476;
+    planName : Text;
+    planType : PlanType__813829990;
+    principal : Principal;
+    status : SubscriptionStatus__536970197;
+    stripeSessionId : ?Text;
+    trialEndDate : Timestamp__301639476;
+    trialStartDate : Timestamp__301639476
+  };
+type SubscriptionStatus__536970197 = {#active; #cancelled; #pastDue; #trial};
 type Timestamp__301639476 = Int;
-actor {
+type TransactionRecord__550555473 =
+  {
+    amountCents : Nat;
+    orderId : Text;
+    paymentMethod : PaymentMethod__736241749;
+    planName : Text;
+    planType : PlanType__813829990;
+    principal : Principal;
+    status : TransactionStatus__362806272;
+    stripeSessionId : ?Text;
+    timestamp : Timestamp__301639476
+  };
+type TransactionStatus__362806272 = {#failed; #pending; #success};
+actor ({
   stable leads :
     {
       var blockIndex : Nat__490723111;
       var blocks : [var [var ?Lead__531162083]];
       var elementIndex : Nat__490723111
     };
-  stable var nextLeadId : Nat
-};
+  in var nextLeadId : Nat;
+  stable subscriptions :
+    {
+      var root : Node__46230540<Principal, SubscriptionRecord__119727226>;
+      var size : Nat__490723111
+    };
+  stable transactions :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?TransactionRecord__550555473]];
+      var elementIndex : Nat__490723111
+    }
+}, {
+  stable leads :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?Lead__531162083]];
+      var elementIndex : Nat__490723111
+    };
+  stable subscriptions :
+    {
+      var root : Node__46230540<Principal, SubscriptionRecord__119727226>;
+      var size : Nat__490723111
+    };
+  stable transactions :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?TransactionRecord__550555473]];
+      var elementIndex : Nat__490723111
+    }
+}) ;

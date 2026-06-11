@@ -1,9 +1,55 @@
+type TransactionView = 
+ record {
+   amountCents: nat;
+   orderId: text;
+   paymentMethod: PaymentMethod;
+   planName: text;
+   planType: PlanType;
+   status: TransactionStatus;
+   stripeSessionId: opt text;
+   timestamp: Timestamp;
+ };
+type TransactionStatus = 
+ variant {
+   failed;
+   pending;
+   success;
+ };
 type Timestamp = int;
+type SubscriptionView = 
+ record {
+   amountCents: nat;
+   createdAt: Timestamp;
+   discountedAmountCents: nat;
+   isInstantPayment: bool;
+   nextBillingDate: Timestamp;
+   planName: text;
+   planType: PlanType;
+   status: SubscriptionStatus;
+   stripeSessionId: opt text;
+   trialEndDate: Timestamp;
+   trialStartDate: Timestamp;
+ };
+type SubscriptionStatus = 
+ variant {
+   active;
+   cancelled;
+   pastDue;
+   trial;
+ };
 type SubmitLeadResult = 
  variant {
    err: text;
    ok: LeadId;
  };
+type PlanType = 
+ variant {
+   enterprise;
+   professional;
+   starter;
+   webDesign;
+ };
+type PaymentMethod = variant {stripe;};
 type LeadInput = 
  record {
    company: text;
@@ -23,6 +69,33 @@ type Lead =
    phone: text;
    submittedAt: Timestamp;
  };
+type GetSubscriptionResult = 
+ variant {
+   notFound;
+   ok: SubscriptionView;
+ };
+type CheckoutSessionResult = 
+ variant {
+   err: text;
+   ok: CheckoutSessionData;
+ };
+type CheckoutSessionData = 
+ record {
+   amountCents: nat;
+   discountedAmountCents: nat;
+   isInstantPayment: bool;
+   isSubscription: bool;
+   orderId: text;
+   planName: text;
+   planType: PlanType;
+   sessionId: text;
+   trialDays: nat;
+ };
+type CheckoutRequest = 
+ record {
+   isInstantPayment: bool;
+   plan: PlanType;
+ };
 type AuditResult = 
  variant {
    err: text;
@@ -41,7 +114,13 @@ type AuditReport =
    url: text;
  };
 service : {
-  getLeads: () -> (vec Lead);
+  cancelSubscription: () -> (bool);
+  confirmPayment: (stripeSessionId: text) -> (bool);
+  createCheckoutSession: (req: CheckoutRequest) -> (CheckoutSessionResult);
+  getAllTransactions: () -> (vec TransactionView);
+  getLeads: () -> (vec Lead) query;
+  getMyTransactions: () -> (vec TransactionView) query;
+  getSubscription: () -> (GetSubscriptionResult) query;
   runSeoAudit: (url: text) -> (AuditResult);
   submitLead: (input: LeadInput) -> (SubmitLeadResult);
 }

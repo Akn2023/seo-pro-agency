@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Award,
+  BarChart,
   BarChart2,
   BarChart3,
   BookOpen,
@@ -16,13 +17,18 @@ import {
   Clock,
   Code2,
   FileSearch,
+  FileText,
   Globe,
+  Link,
   Link2,
   Loader2,
   MapPin,
+  Megaphone,
   MessageSquare,
+  PenLine,
   Search,
   SearchCheck,
+  Settings,
   ShoppingCart,
   Smartphone,
   Star,
@@ -726,7 +732,7 @@ function PricingSection() {
                       </ul>
 
                       <a
-                        href="#contact"
+                        href={`/checkout?plan=${name.toLowerCase()}`}
                         data-ocid={`pricing.cta_button.${index + 1}`}
                       >
                         <Button
@@ -743,6 +749,181 @@ function PricingSection() {
             },
           )}
         </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Workflow Teaser ──────────────────────────────────────────────────────────
+
+const WORKFLOW_PHASES = [
+  {
+    num: "01",
+    name: "Discovery & AI Audit",
+    icon: Search,
+    color: "text-violet-500",
+    bg: "bg-violet-500/10",
+    border: "border-violet-500/20",
+  },
+  {
+    num: "02",
+    name: "Technical Foundation",
+    icon: Settings,
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    border: "border-blue-500/20",
+  },
+  {
+    num: "03",
+    name: "On-Page Optimisation",
+    icon: FileText,
+    color: "text-cyan-500",
+    bg: "bg-cyan-500/10",
+    border: "border-cyan-500/20",
+  },
+  {
+    num: "04",
+    name: "Content Strategy",
+    icon: PenLine,
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    border: "border-emerald-500/20",
+  },
+  {
+    num: "05",
+    name: "Link Building",
+    icon: Link,
+    color: "text-primary",
+    bg: "bg-primary/10",
+    border: "border-primary/20",
+  },
+  {
+    num: "06",
+    name: "Paid & Social",
+    icon: Megaphone,
+    color: "text-orange-500",
+    bg: "bg-orange-500/10",
+    border: "border-orange-500/20",
+  },
+  {
+    num: "07",
+    name: "Reporting",
+    icon: BarChart,
+    color: "text-accent",
+    bg: "bg-accent/10",
+    border: "border-accent/20",
+  },
+];
+
+function WorkflowTeaserSection() {
+  return (
+    <section
+      id="workflow"
+      className="relative py-20 overflow-hidden bg-background"
+    >
+      {/* Subtle decorative blobs */}
+      <div className="absolute top-10 left-10 w-72 h-72 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-64 h-64 rounded-full bg-accent/5 blur-3xl pointer-events-none" />
+
+      <div className="relative container mx-auto px-4">
+        {/* Heading */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-14"
+        >
+          <Badge
+            variant="outline"
+            className="mb-4 text-primary border-primary/30 bg-primary/5 px-4 py-1.5"
+          >
+            SEO Process
+          </Badge>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
+            How We <span className="gradient-text">Deliver Results</span>
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            A proven, step-by-step process to grow your organic traffic and
+            rankings — from first audit to ongoing optimisation.
+          </p>
+        </motion.div>
+
+        {/* Phase cards */}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4 mb-12"
+          data-ocid="workflow_teaser.list"
+        >
+          {WORKFLOW_PHASES.map(
+            ({ num, name, icon: Icon, color, bg, border }, index) => (
+              <motion.div
+                key={num}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.08 }}
+                data-ocid={`workflow_teaser.item.${index + 1}`}
+                className="relative group"
+              >
+                <Card
+                  className={`h-full rounded-xl border ${border} bg-card hover:shadow-md transition-all duration-300 hover:-translate-y-1 cursor-default`}
+                >
+                  <CardContent className="p-5 flex flex-col items-center text-center gap-3">
+                    {/* Phase number badge */}
+                    <span
+                      className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold tracking-widest ${color} ${bg} border ${border}`}
+                    >
+                      {num}
+                    </span>
+
+                    {/* Icon */}
+                    <div
+                      className={`w-12 h-12 rounded-xl ${bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <Icon className={`w-6 h-6 ${color}`} />
+                    </div>
+
+                    {/* Name */}
+                    <p className="font-display font-semibold text-foreground text-sm leading-snug">
+                      {name}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Flow connector arrow — shown between cards on xl (horizontal layout) */}
+                {index < WORKFLOW_PHASES.length - 1 && (
+                  <div className="hidden xl:flex absolute top-1/2 -right-2.5 -translate-y-1/2 z-10 items-center">
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
+                  </div>
+                )}
+              </motion.div>
+            ),
+          )}
+        </div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.45, delay: 0.6 }}
+          className="flex justify-center"
+        >
+          <motion.a
+            href="/workflow"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            data-ocid="workflow_teaser.view_workflow_button"
+          >
+            <Button
+              size="lg"
+              className="btn-gradient font-semibold px-8 py-6 text-base shadow-md hover:shadow-lg gap-2"
+            >
+              Explore Full Workflow
+              <ChevronRight className="w-5 h-5" />
+            </Button>
+          </motion.a>
+        </motion.div>
       </div>
     </section>
   );
@@ -1124,6 +1305,7 @@ export default function Home() {
       <ToolsSection />
       <StatsSection />
       <PricingSection />
+      <WorkflowTeaserSection />
       <TestimonialsSection />
       <ContactSection />
     </div>

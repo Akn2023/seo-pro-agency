@@ -9,7 +9,8 @@ const NAV_LINKS = [
   { label: "Services", href: "/services", isRoute: true },
   { label: "Tools", href: "/tools", isRoute: true },
   { label: "Blog", href: "/blog", isRoute: true },
-  { label: "Pricing", href: "/#pricing", isRoute: false },
+  { label: "Workflow", href: "/workflow", isRoute: true },
+  { label: "Pricing", href: "/checkout", isRoute: true },
   { label: "About", href: "/about", isRoute: true },
   { label: "Contact", href: "/#contact", isRoute: false },
 ];

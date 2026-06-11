@@ -1,8 +1,8 @@
-import Debug "mo:core/Debug";
 import AuditTypes "../types/audit";
+import AuditLib "../lib/audit";
 
 mixin () {
-  public func runSeoAudit(url : Text) : async AuditTypes.AuditResult {
-    Debug.todo();
+  public shared func runSeoAudit(url : Text) : async AuditTypes.AuditResult {
+    AuditLib.runAudit(url);
   };
 };

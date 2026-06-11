@@ -8,8 +8,49 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const LeadId = IDL.Nat;
+export const PlanType = IDL.Variant({
+  'webDesign' : IDL.Null,
+  'enterprise' : IDL.Null,
+  'starter' : IDL.Null,
+  'professional' : IDL.Null,
+});
+export const CheckoutRequest = IDL.Record({
+  'isInstantPayment' : IDL.Bool,
+  'plan' : PlanType,
+});
+export const CheckoutSessionData = IDL.Record({
+  'isSubscription' : IDL.Bool,
+  'isInstantPayment' : IDL.Bool,
+  'trialDays' : IDL.Nat,
+  'discountedAmountCents' : IDL.Nat,
+  'amountCents' : IDL.Nat,
+  'orderId' : IDL.Text,
+  'sessionId' : IDL.Text,
+  'planName' : IDL.Text,
+  'planType' : PlanType,
+});
+export const CheckoutSessionResult = IDL.Variant({
+  'ok' : CheckoutSessionData,
+  'err' : IDL.Text,
+});
+export const TransactionStatus = IDL.Variant({
+  'pending' : IDL.Null,
+  'success' : IDL.Null,
+  'failed' : IDL.Null,
+});
+export const PaymentMethod = IDL.Variant({ 'stripe' : IDL.Null });
 export const Timestamp = IDL.Int;
+export const TransactionView = IDL.Record({
+  'status' : TransactionStatus,
+  'paymentMethod' : PaymentMethod,
+  'amountCents' : IDL.Nat,
+  'orderId' : IDL.Text,
+  'timestamp' : Timestamp,
+  'stripeSessionId' : IDL.Opt(IDL.Text),
+  'planName' : IDL.Text,
+  'planType' : PlanType,
+});
+export const LeadId = IDL.Nat;
 export const Lead = IDL.Record({
   'id' : LeadId,
   'fullName' : IDL.Text,
@@ -18,6 +59,29 @@ export const Lead = IDL.Record({
   'company' : IDL.Text,
   'message' : IDL.Text,
   'phone' : IDL.Text,
+});
+export const SubscriptionStatus = IDL.Variant({
+  'trial' : IDL.Null,
+  'active' : IDL.Null,
+  'cancelled' : IDL.Null,
+  'pastDue' : IDL.Null,
+});
+export const SubscriptionView = IDL.Record({
+  'status' : SubscriptionStatus,
+  'nextBillingDate' : Timestamp,
+  'trialEndDate' : Timestamp,
+  'isInstantPayment' : IDL.Bool,
+  'createdAt' : Timestamp,
+  'discountedAmountCents' : IDL.Nat,
+  'amountCents' : IDL.Nat,
+  'stripeSessionId' : IDL.Opt(IDL.Text),
+  'trialStartDate' : Timestamp,
+  'planName' : IDL.Text,
+  'planType' : PlanType,
+});
+export const GetSubscriptionResult = IDL.Variant({
+  'ok' : SubscriptionView,
+  'notFound' : IDL.Null,
 });
 export const AuditReport = IDL.Record({
   'url' : IDL.Text,
@@ -47,7 +111,17 @@ export const SubmitLeadResult = IDL.Variant({
 });
 
 export const idlService = IDL.Service({
-  'getLeads' : IDL.Func([], [IDL.Vec(Lead)], []),
+  'cancelSubscription' : IDL.Func([], [IDL.Bool], []),
+  'confirmPayment' : IDL.Func([IDL.Text], [IDL.Bool], []),
+  'createCheckoutSession' : IDL.Func(
+      [CheckoutRequest],
+      [CheckoutSessionResult],
+      [],
+    ),
+  'getAllTransactions' : IDL.Func([], [IDL.Vec(TransactionView)], []),
+  'getLeads' : IDL.Func([], [IDL.Vec(Lead)], ['query']),
+  'getMyTransactions' : IDL.Func([], [IDL.Vec(TransactionView)], ['query']),
+  'getSubscription' : IDL.Func([], [GetSubscriptionResult], ['query']),
   'runSeoAudit' : IDL.Func([IDL.Text], [AuditResult], []),
   'submitLead' : IDL.Func([LeadInput], [SubmitLeadResult], []),
 });
@@ -55,8 +129,49 @@ export const idlService = IDL.Service({
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
-  const LeadId = IDL.Nat;
+  const PlanType = IDL.Variant({
+    'webDesign' : IDL.Null,
+    'enterprise' : IDL.Null,
+    'starter' : IDL.Null,
+    'professional' : IDL.Null,
+  });
+  const CheckoutRequest = IDL.Record({
+    'isInstantPayment' : IDL.Bool,
+    'plan' : PlanType,
+  });
+  const CheckoutSessionData = IDL.Record({
+    'isSubscription' : IDL.Bool,
+    'isInstantPayment' : IDL.Bool,
+    'trialDays' : IDL.Nat,
+    'discountedAmountCents' : IDL.Nat,
+    'amountCents' : IDL.Nat,
+    'orderId' : IDL.Text,
+    'sessionId' : IDL.Text,
+    'planName' : IDL.Text,
+    'planType' : PlanType,
+  });
+  const CheckoutSessionResult = IDL.Variant({
+    'ok' : CheckoutSessionData,
+    'err' : IDL.Text,
+  });
+  const TransactionStatus = IDL.Variant({
+    'pending' : IDL.Null,
+    'success' : IDL.Null,
+    'failed' : IDL.Null,
+  });
+  const PaymentMethod = IDL.Variant({ 'stripe' : IDL.Null });
   const Timestamp = IDL.Int;
+  const TransactionView = IDL.Record({
+    'status' : TransactionStatus,
+    'paymentMethod' : PaymentMethod,
+    'amountCents' : IDL.Nat,
+    'orderId' : IDL.Text,
+    'timestamp' : Timestamp,
+    'stripeSessionId' : IDL.Opt(IDL.Text),
+    'planName' : IDL.Text,
+    'planType' : PlanType,
+  });
+  const LeadId = IDL.Nat;
   const Lead = IDL.Record({
     'id' : LeadId,
     'fullName' : IDL.Text,
@@ -65,6 +180,29 @@ export const idlFactory = ({ IDL }) => {
     'company' : IDL.Text,
     'message' : IDL.Text,
     'phone' : IDL.Text,
+  });
+  const SubscriptionStatus = IDL.Variant({
+    'trial' : IDL.Null,
+    'active' : IDL.Null,
+    'cancelled' : IDL.Null,
+    'pastDue' : IDL.Null,
+  });
+  const SubscriptionView = IDL.Record({
+    'status' : SubscriptionStatus,
+    'nextBillingDate' : Timestamp,
+    'trialEndDate' : Timestamp,
+    'isInstantPayment' : IDL.Bool,
+    'createdAt' : Timestamp,
+    'discountedAmountCents' : IDL.Nat,
+    'amountCents' : IDL.Nat,
+    'stripeSessionId' : IDL.Opt(IDL.Text),
+    'trialStartDate' : Timestamp,
+    'planName' : IDL.Text,
+    'planType' : PlanType,
+  });
+  const GetSubscriptionResult = IDL.Variant({
+    'ok' : SubscriptionView,
+    'notFound' : IDL.Null,
   });
   const AuditReport = IDL.Record({
     'url' : IDL.Text,
@@ -88,7 +226,17 @@ export const idlFactory = ({ IDL }) => {
   const SubmitLeadResult = IDL.Variant({ 'ok' : LeadId, 'err' : IDL.Text });
   
   return IDL.Service({
-    'getLeads' : IDL.Func([], [IDL.Vec(Lead)], []),
+    'cancelSubscription' : IDL.Func([], [IDL.Bool], []),
+    'confirmPayment' : IDL.Func([IDL.Text], [IDL.Bool], []),
+    'createCheckoutSession' : IDL.Func(
+        [CheckoutRequest],
+        [CheckoutSessionResult],
+        [],
+      ),
+    'getAllTransactions' : IDL.Func([], [IDL.Vec(TransactionView)], []),
+    'getLeads' : IDL.Func([], [IDL.Vec(Lead)], ['query']),
+    'getMyTransactions' : IDL.Func([], [IDL.Vec(TransactionView)], ['query']),
+    'getSubscription' : IDL.Func([], [GetSubscriptionResult], ['query']),
     'runSeoAudit' : IDL.Func([IDL.Text], [AuditResult], []),
     'submitLead' : IDL.Func([LeadInput], [SubmitLeadResult], []),
   });

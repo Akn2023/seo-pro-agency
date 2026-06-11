@@ -1,14 +1,13 @@
-import Debug "mo:core/Debug";
 import List "mo:core/List";
 import LeadTypes "../types/leads";
-import Common "../types/common";
+import LeadsLib "../lib/leads";
 
-mixin (leads : List.List<LeadTypes.Lead>, nextLeadId : Nat) {
-  public func submitLead(input : LeadTypes.LeadInput) : async LeadTypes.SubmitLeadResult {
-    Debug.todo();
+mixin (leads : List.List<LeadTypes.Lead>) {
+  public shared func submitLead(input : LeadTypes.LeadInput) : async LeadTypes.SubmitLeadResult {
+    LeadsLib.submitLead(leads, input);
   };
 
-  public func getLeads() : async [LeadTypes.Lead] {
-    Debug.todo();
+  public shared query func getLeads() : async [LeadTypes.Lead] {
+    LeadsLib.getAllLeads(leads);
   };
 };

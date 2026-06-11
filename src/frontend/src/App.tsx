@@ -16,6 +16,9 @@ const ToolsPage = lazy(() => import("./pages/Tools"));
 const AboutPage = lazy(() => import("./pages/About"));
 const BlogPage = lazy(() => import("./pages/Blog"));
 const BlogPostPage = lazy(() => import("./pages/BlogPost"));
+const WorkflowPage = lazy(() => import("./pages/Workflow"));
+const CheckoutPage = lazy(() => import("./pages/Checkout"));
+const CheckoutSuccessPage = lazy(() => import("./pages/CheckoutSuccess"));
 
 const PageLoader = () => (
   <div className="container mx-auto px-4 py-24 space-y-6">
@@ -107,6 +110,36 @@ const blogPostRoute = createRoute({
   ),
 });
 
+const workflowRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/workflow",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <WorkflowPage />
+    </Suspense>
+  ),
+});
+
+const checkoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checkout",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <CheckoutPage />
+    </Suspense>
+  ),
+});
+
+const checkoutSuccessRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checkout/success",
+  component: () => (
+    <Suspense fallback={<PageLoader />}>
+      <CheckoutSuccessPage />
+    </Suspense>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
   auditRoute,
@@ -115,6 +148,9 @@ const routeTree = rootRoute.addChildren([
   aboutRoute,
   blogRoute,
   blogPostRoute,
+  workflowRoute,
+  checkoutRoute,
+  checkoutSuccessRoute,
 ]);
 
 const router = createRouter({ routeTree });

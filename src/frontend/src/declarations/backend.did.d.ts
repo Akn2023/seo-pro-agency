@@ -23,6 +23,25 @@ export interface AuditReport {
 }
 export type AuditResult = { 'ok' : AuditReport } |
   { 'err' : string };
+export interface CheckoutRequest {
+  'isInstantPayment' : boolean,
+  'plan' : PlanType,
+}
+export interface CheckoutSessionData {
+  'isSubscription' : boolean,
+  'isInstantPayment' : boolean,
+  'trialDays' : bigint,
+  'discountedAmountCents' : bigint,
+  'amountCents' : bigint,
+  'orderId' : string,
+  'sessionId' : string,
+  'planName' : string,
+  'planType' : PlanType,
+}
+export type CheckoutSessionResult = { 'ok' : CheckoutSessionData } |
+  { 'err' : string };
+export type GetSubscriptionResult = { 'ok' : SubscriptionView } |
+  { 'notFound' : null };
 export interface Lead {
   'id' : LeadId,
   'fullName' : string,
@@ -40,11 +59,55 @@ export interface LeadInput {
   'message' : string,
   'phone' : string,
 }
+export type PaymentMethod = { 'stripe' : null };
+export type PlanType = { 'webDesign' : null } |
+  { 'enterprise' : null } |
+  { 'starter' : null } |
+  { 'professional' : null };
 export type SubmitLeadResult = { 'ok' : LeadId } |
   { 'err' : string };
+export type SubscriptionStatus = { 'trial' : null } |
+  { 'active' : null } |
+  { 'cancelled' : null } |
+  { 'pastDue' : null };
+export interface SubscriptionView {
+  'status' : SubscriptionStatus,
+  'nextBillingDate' : Timestamp,
+  'trialEndDate' : Timestamp,
+  'isInstantPayment' : boolean,
+  'createdAt' : Timestamp,
+  'discountedAmountCents' : bigint,
+  'amountCents' : bigint,
+  'stripeSessionId' : [] | [string],
+  'trialStartDate' : Timestamp,
+  'planName' : string,
+  'planType' : PlanType,
+}
 export type Timestamp = bigint;
+export type TransactionStatus = { 'pending' : null } |
+  { 'success' : null } |
+  { 'failed' : null };
+export interface TransactionView {
+  'status' : TransactionStatus,
+  'paymentMethod' : PaymentMethod,
+  'amountCents' : bigint,
+  'orderId' : string,
+  'timestamp' : Timestamp,
+  'stripeSessionId' : [] | [string],
+  'planName' : string,
+  'planType' : PlanType,
+}
 export interface _SERVICE {
+  'cancelSubscription' : ActorMethod<[], boolean>,
+  'confirmPayment' : ActorMethod<[string], boolean>,
+  'createCheckoutSession' : ActorMethod<
+    [CheckoutRequest],
+    CheckoutSessionResult
+  >,
+  'getAllTransactions' : ActorMethod<[], Array<TransactionView>>,
   'getLeads' : ActorMethod<[], Array<Lead>>,
+  'getMyTransactions' : ActorMethod<[], Array<TransactionView>>,
+  'getSubscription' : ActorMethod<[], GetSubscriptionResult>,
   'runSeoAudit' : ActorMethod<[string], AuditResult>,
   'submitLead' : ActorMethod<[LeadInput], SubmitLeadResult>,
 }

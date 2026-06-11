@@ -18,7 +18,8 @@ const FOOTER_LINKS = {
   Resources: [
     { label: "Free Audit Tool", href: "/audit", isRoute: true },
     { label: "SEO Tools", href: "/tools", isRoute: true },
-    { label: "Pricing", href: "/#pricing", isRoute: false },
+    { label: "Get Started", href: "/checkout", isRoute: true },
+    { label: "Pricing", href: "/checkout", isRoute: true },
     { label: "Contact", href: "/#contact", isRoute: false },
   ],
 };
@@ -95,6 +96,7 @@ export function Footer() {
                             | "/services"
                             | "/tools"
                             | "/about"
+                            | "/checkout"
                         }
                         className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
                         data-ocid={`footer.link.${link.label.toLowerCase().replace(/\s/g, "_")}`}
